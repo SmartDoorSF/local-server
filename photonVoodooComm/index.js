@@ -14,7 +14,10 @@ var board = new Particle({
   port: 48879
 });
 
-board.on('ready', function() {
+
+console.log("Board mode: " + objectDebug(board.MODES));
+
+function exec_context() {
   console.log(
     "Connected to " + board.deviceName + 
     " (" + board.deviceId + ") " +
@@ -23,6 +26,6 @@ board.on('ready', function() {
 
   this.pinMode("D7", this.MODES.OUTPUT); // this.pinMode("D7", 1);
   this.digitalWrite("D7", 1);
-});
+}
 
-console.log("Board mode: " + objectDebug(board.MODES));
+board.on('ready', exec_context);
