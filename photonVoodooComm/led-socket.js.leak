@@ -1,7 +1,13 @@
+// Memory leak
 var Particle = require('particle-io');
+// var readline = require('readline');
+var server = require('http').createServer();
+var io = require('socket.io')(server);
 
-var LOW = 0;
 var HIGH = 1;
+var LOW = 0;
+var D6Status = LOW;
+var D7Status = LOW;
 /*******************************************************************************
  * Function Name  : debounce
  * Description    : Software key debounce
@@ -30,6 +36,7 @@ var debounce = function(pin, readState) {
   this.digitalRead(pin, execAfterRead);
 };
 
+// Error state -1;
 var negState = function(state) {
   if (state === HIGH) {
     return LOW;
@@ -39,49 +46,50 @@ var negState = function(state) {
   return -1;
 };
 
-/*******************************************************************************
- * Function Name  : debounce
- * Description    :
- * Input          :
- * Output         :
- * Return         :
- * Returns a negative number on faliure
- ********************************************************************************/
-var queue = [];
-var BUF_LEN = 30;
-var sumQueue = 0;
-
-var smoothFilter = function(newNumber) {
-  queue.push(newNumber);
-  sumQueue += newNumber;
-  if (queue.length === BUF_LEN) {
-    sumQueue -= queue.shift();
-  }
-  return sumQueue >= BUF_LEN/2;
+var listeningKey = function(pin) {
+  var self = this;
+  var readState = function(pinState) {
+    pinStatus = negState(pinState);
+    self.digitalWrite('D7', pinStatus);
+  };
+  debounce.call(this, pin, readState);
 };
+
+/*
+ * Socket IO
+ */
+io.on('connection', function(socket) {
+//  socket.on()
+});
 
 var board = new Particle({
   host: '192.168.1.117',
   port: 48879
 });
 
-
 board.on('ready', exec_context);
+
+board.on('close', function() {
+  process.exit(0);
+  this.stop();
+});
 
 function exec_context() {
   // Using pin to simulate
   this.pinMode('D7', this.MODES.OUTPUT);
   this.pinMode('D6', this.MODES.INPUT);
 
-  var D6preState = false;
-  var D7State = LOW;
+  console.log("exec_context!!");
+  var byte = 0;
   var self = this;
-  debounce.call(this, 'D6', function(state) {
-//    console.log(state);
-    if (D6preState !== smoothFilter(state)) {
-      self.digitalWrite('D7', D7State = negState(D7State));
-//      console.log(D7State);
-    }
-    preState = state;
-  });
+  var foreverLoop = function() {
+    listeningKey.call(self, 'D6');
+    foreverLoop();
+  };
+
+  foreverLoop();
+  /* setTimeout(function() {
+  
+  }.bind(this), 500); */
+  
 }
