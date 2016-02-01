@@ -1,17 +1,13 @@
+// Memory leak
 var Particle = require('particle-io');
 // var readline = require('readline');
 var server = require('http').createServer();
 var io = require('socket.io')(server);
 
-io.on('connection', function(socket) {
-  socket.on()
-});
-
-
 var HIGH = 1;
 var LOW = 0;
-var D6Status;
-var D7Status;
+var D6Status = LOW;
+var D7Status = LOW;
 /*******************************************************************************
  * Function Name  : debounce
  * Description    : Software key debounce
@@ -22,49 +18,78 @@ var D7Status;
  ********************************************************************************/
 var debounce = function(pin, readState) {
   var pinState = -1;
-  var newStatus = digitalRead(pin);
-  if (newStatus === HIGH) {
-    readState(false);
+  var newStatus = LOW;
+  function execAfterRead(state) {
+    newStatus = state;
+    if (newStatus === HIGH) {
+      readState(false);
+      return;
+    }
+    var self = this;
+    setTimeout(function() {
+      self.digitalRead(pin, function(state) {
+        newStatus = state;
+        readState(newStatus === HIGH);
+      });
+    }, 100);
   }
-  var self = this;
-  setTimeout(function() {
-    newStatus = self.digitalRead(pin);
-    readState(newStatus === HIGH);
-  }, 100);
+  this.digitalRead(pin, execAfterRead);
 };
+
+// Error state -1;
+var negState = function(state) {
+  if (state === HIGH) {
+    return LOW;
+  } else if (state === LOW) {
+    return HIGH;
+  }
+  return -1;
+};
+
+var listeningKey = function(pin) {
+  var self = this;
+  var readState = function(pinState) {
+    pinStatus = negState(pinState);
+    self.digitalWrite('D7', pinStatus);
+  };
+  debounce.call(this, pin, readState);
+};
+
+/*
+ * Socket IO
+ */
+io.on('connection', function(socket) {
+//  socket.on()
+});
 
 var board = new Particle({
   host: '192.168.1.117',
   port: 48879
 });
 
-var listeningKey = function(pin) {
-  var readState = function(pinState) {
-  };
-};
-
 board.on('ready', exec_context);
+
+board.on('close', function() {
+  process.exit(0);
+  this.stop();
+});
 
 function exec_context() {
   // Using pin to simulate
   this.pinMode('D7', this.MODES.OUTPUT);
+  this.pinMode('D6', this.MODES.INPUT);
 
-/*  rl.setPrompt('SERVO Simulation ');
-  rl.prompt();
-
+  console.log("exec_context!!");
+  var byte = 0;
   var self = this;
+  var foreverLoop = function() {
+    listeningKey.call(self, 'D6');
+    foreverLoop();
+  };
 
-  rl.on('line', function(line) {
-    var pos = line.trim();
-    console.log("POS: ", pos);
-    if (pos === '1') {
-      self.digitalWrite("D7", 1);
-    } else {
-      self.digitalWrite("D7", 0);
-    }
-    rl.prompt();
-  }).on('close', function() {
-    self.digitalWrite("D7", 0);
-    process.exit(0);
-  });*/
+  foreverLoop();
+  /* setTimeout(function() {
+  
+  }.bind(this), 500); */
+  
 }
