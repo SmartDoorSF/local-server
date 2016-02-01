@@ -6,10 +6,17 @@ var rl = readline.createInterface({
   output: process.stdout
 });
 
+/*
 var board = new Particle({
   token: process.env.PARTICLE_TOKEN,
   deviceId: process.env.PARTICLE_DEVICE_ID
+});*/
+
+var board = new Particle({
+  host: '192.168.1.117',
+  port: 48879
 });
+
 
 board.on('ready', exec_context);
 
@@ -22,17 +29,19 @@ function exec_context() {
   rl.setPrompt('SERVO Simulation ');
   rl.prompt();
 
+  var self = this;
+
   rl.on('line', function(line) {
     var pos = line.trim();
     console.log("POS: ", pos);
-    if (pos === 1) {
-      this.digitalWrite("D7", 1);
+    if (pos === '1') {
+      self.digitalWrite("D7", 1);
     } else {
-      this.digitalWrite("D7", 0);
+      self.digitalWrite("D7", 0);
     }
     rl.prompt();
   }).on('close', function() {
-    this.digitalWrite("D7", 0);
+    self.digitalWrite("D7", 0);
     process.exit(0);
   });
 }
