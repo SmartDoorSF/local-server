@@ -20,13 +20,15 @@ function checkCredential(target, CREDENTIAL) {
   return target === CREDENTIAL;
 }
 // JSON body parser
-function parseResponse(resp) {
-  console.log("RECEIVED RESPONSE from Remote Server", resp);
-  return resp;
+function parseResponse(res) {
+  console.log("RECEIVED RESPONSE from Remote Server", res.body);
+  return res.body;
 }
+
+/*
 function getAuthFromRemote(action) {
   request
-    .get(HEROKU_HOST + PATH)
+    .post(HEROKU_HOST + PATH, {form: {key: 'value'}})
     .on('response', function(response) {
       var openDoor = checkCredential(parseResponse(response), CREDENTIAL);
       action(openDoor);
@@ -34,6 +36,14 @@ function getAuthFromRemote(action) {
     .on('error', function(err) {
       throw "Encounter Errors when make get request to " + HEROKU_HOST + PATH;
     });
+}*/
+
+function getAuthFromRemote(action) {
+  request.post({url: HEROKU_HOST + PATH, form: {key: 'value'}}, function(err, httpResp, body){
+//    console.log(body);
+    var openDoor = checkCredential(body, CREDENTIAL);
+    action(openDoor);
+  });
 }
 
 /*******************************************************************************
@@ -94,11 +104,16 @@ var smoothFilter = function(newNumber) {
   return sumQueue >= BUF_LEN/2;
 };
 
+/*
 var board = new Particle({
   host: '192.168.1.117',
   port: 48879
 });
-
+*/
+var board = new Particle({
+  host: '10.84.18.7',
+  port: 48879,
+});
 
 board.on('ready', exec_context);
 
