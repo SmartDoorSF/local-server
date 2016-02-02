@@ -1,7 +1,41 @@
 var Particle = require('particle-io');
+var http = require('http');
+var request = require('request');
+
+var HEROKU_HOST = "https://www.google.com";
+var PAHT = "/";
+var CREDENTIAL = 'open';
 
 var LOW = 0;
 var HIGH = 1;
+/*******************************************************************************
+ * Function Name  :
+ * Description    :
+ * Input          : Pin
+ * Output         : None.
+ * Return         :
+ * Returns
+ ********************************************************************************/
+function checkCredential(target, CREDENTIAL) {
+  return target === CREDENTIAL;
+}
+// JSON body parser
+function parseResponse(resp) {
+  console.log("RECEIVED RESPONSE from Remote Server", resp);
+  return resp;
+}
+function getAuthFromRemote(action) {
+  request
+    .get(HEROKU_HOST + PATH)
+    .on('response', function(response) {
+      var openDoor = checkCredential(parseResponse(response), CREDENTIAL);
+      action(openDoor);
+    })
+    .on('error', function(err) {
+      throw "Encounter Errors when make get request to " + HEROKU_HOST + PATH;
+    });
+}
+
 /*******************************************************************************
  * Function Name  : debounce
  * Description    : Software key debounce
@@ -79,8 +113,12 @@ function exec_context() {
   debounce.call(this, 'D6', function(state) {
 //    console.log(state);
     if (D6preState !== smoothFilter(state)) {
-      self.digitalWrite('D7', D7State = negState(D7State));
 //      console.log(D7State);
+      getAuthFromRemote(function(openDoor) {
+        if (openDoor) {
+          self.digitalWrite('D7', D7State = negState(D7State));
+        }
+      });
     }
     preState = state;
   });
