@@ -2,8 +2,8 @@ var Particle = require('particle-io');
 var http = require('http');
 var request = require('request');
 
-var HEROKU_HOST = "https://www.google.com";
-var PAHT = "/";
+var HEROKU_HOST = "https://powerful-ravine-17147.herokuapp.com/";
+var PATH = "decision/";
 var CREDENTIAL = 'open';
 
 var LOW = 0;

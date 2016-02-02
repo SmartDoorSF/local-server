@@ -4,16 +4,20 @@ var objectDebug = function(obj) {
   return JSON.stringify(obj);
 };
 
-/*var board = new Particle({
+/* var board = new Particle({
   token: process.env.PARTICLE_TOKEN,
   deviceId: process.env.PARTICLE_DEVICE_ID
 });*/
 
-var board = new Particle({
+/* var board = new Particle({
   host: '192.168.1.117',
   port: 48879
-});
+});*/
 
+var board = new Particle({
+  host: '10.84.18.7',
+  port: 48879,
+});
 
 console.log("Board mode: " + objectDebug(board.MODES));
 
@@ -29,3 +33,6 @@ function exec_context() {
 }
 
 board.on('ready', exec_context);
+board.on('error', function(err) {
+  console.log("ERROR!" + err);
+});
