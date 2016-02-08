@@ -63,7 +63,7 @@ function exec_context() {
 
   var self = this;
   this.digitalRead('D6', function(data) {
-    console.log(data);
+//    console.log(data);
     getAuthFromRemote(function(openDoor) {
       // Currently, since remote server is not steadily available 
       // Always override openDoor to be true;
