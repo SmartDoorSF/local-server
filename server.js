@@ -5,11 +5,10 @@ app.get('/', function(req, res) {
   res.send('Hello World!');
 });
 
-var server = app.listen(8000, '10.0.0.20', function() {
+var server = app.listen(3001, function() {
   var host = server.address().address;
   var port = server.address().port;
 
   console.log(server.address());
-
   console.log('Example app listening at http://%s:%s', host, port);
 });

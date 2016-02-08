@@ -25,19 +25,6 @@ function parseResponse(res) {
   return res.body;
 }
 
-/*
-function getAuthFromRemote(action) {
-  request
-    .post(HEROKU_HOST + PATH, {form: {key: 'value'}})
-    .on('response', function(response) {
-      var openDoor = checkCredential(parseResponse(response), CREDENTIAL);
-      action(openDoor);
-    })
-    .on('error', function(err) {
-      throw "Encounter Errors when make get request to " + HEROKU_HOST + PATH;
-    });
-}*/
-
 function getAuthFromRemote(action) {
   request.post({url: HEROKU_HOST + PATH, form: {key: 'value'}}, function(err, httpResp, body){
 //    console.log(body);
@@ -55,32 +42,6 @@ function getAuthFromRemote(action) {
  * Returns a negative number on faliure
  ********************************************************************************/
 var debounce = function(pin, readState) {
-  var pinState = -1;
-  var newStatus = LOW;
-  function execAfterRead(state) {
-    newStatus = state;
-    if (newStatus === HIGH) {
-      readState(false);
-      return;
-    }
-    var self = this;
-    setTimeout(function() {
-      self.digitalRead(pin, function(state) {
-        newStatus = state;
-        readState(newStatus === HIGH);
-      });
-    }, 100);
-  }
-  this.digitalRead(pin, execAfterRead);
-};
-
-var negState = function(state) {
-  if (state === HIGH) {
-    return LOW;
-  } else if (state === LOW) {
-    return HIGH;
-  }
-  return -1;
 };
 
 /*******************************************************************************
@@ -104,19 +65,6 @@ var smoothFilter = function(newNumber) {
   return sumQueue >= BUF_LEN/2;
 };
 
-/*
-var board = new Particle({
-  host: '192.168.1.117',
-  port: 48879
-});
-*/
-
-/*
-var board = new Particle({
-  host: '10.84.18.7',
-  port: 48879,
-});*/
-
 var board = new Particle({
   host: '192.168.1.113',
   port: 48879,
@@ -129,19 +77,19 @@ function exec_context() {
   this.pinMode('D7', this.MODES.OUTPUT);
   this.pinMode('D6', this.MODES.INPUT);
 
-  var D6preState = false;
   var D7State = LOW;
+
   var self = this;
-  debounce.call(this, 'D6', function(state) {
-//    console.log(state);
-    if (D6preState !== smoothFilter(state)) {
-//      console.log(D7State);
-      getAuthFromRemote(function(openDoor) {
-        if (openDoor) {
-          self.digitalWrite('D7', D7State = negState(D7State));
-        }
-      });
-    }
-    preState = state;
+  this.digitalRead('D6', function(data) {
+    console.log(data);
+    getAuthFromRemote(function(openDoor) {
+      // Currently, since remote server is not steadily available 
+      // Always override openDoor to be true;
+      openDoor = true;
+      if (openDoor && data === HIGH) {
+        D7State = !D7State;
+        self.digitalWrite('D7', D7State);
+      }
+    });
   });
 }
