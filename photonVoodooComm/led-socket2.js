@@ -33,6 +33,9 @@ function getAuthFromRemote(action) {
   });
 }
 
+// TODO:
+// Add time based debounce function
+
 /*******************************************************************************
  * Function Name  : debounce
  * Description    : Software key debounce
@@ -42,27 +45,6 @@ function getAuthFromRemote(action) {
  * Returns a negative number on faliure
  ********************************************************************************/
 var debounce = function(pin, readState) {
-};
-
-/*******************************************************************************
- * Function Name  : debounce
- * Description    :
- * Input          :
- * Output         :
- * Return         :
- * Returns a negative number on faliure
- ********************************************************************************/
-var queue = [];
-var BUF_LEN = 30;
-var sumQueue = 0;
-
-var smoothFilter = function(newNumber) {
-  queue.push(newNumber);
-  sumQueue += newNumber;
-  if (queue.length === BUF_LEN) {
-    sumQueue -= queue.shift();
-  }
-  return sumQueue >= BUF_LEN/2;
 };
 
 var board = new Particle({
