@@ -1,0 +1,14 @@
+{
+  "name": "softap",
+  "version": "0.0.1",
+  "description": "",
+  "main": "tcpSoftAP.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "softap-setup": "node_modules/softap-setup"
+  },
+  "author": "",
+  "license": "ISC"
+}
